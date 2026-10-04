@@ -1,5 +1,3 @@
-// Run with: scala-cli --power --jmh  .
-
 package specializationtalk
 
 import org.openjdk.jmh.annotations.*
