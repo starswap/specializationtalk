@@ -1,0 +1,43 @@
+// Run with: scala-cli --power --jmh  .
+
+package specializationtalk
+
+import org.openjdk.jmh.annotations.*
+import java.util.concurrent.TimeUnit
+import org.openjdk.jmh.infra.Blackhole
+
+import matrix.* 
+
+@State(Scope.Benchmark)
+class Data:
+  val n = 300
+
+  val mat1values = Array.fill(n * n)(math.round(math.random() * 100).toInt)
+  val mat2values = Array.fill(n * n)(math.round(math.random() * 100).toInt)
+
+  val result = Array.ofDim[Int](n * n)
+
+@State(Scope.Benchmark)
+@BenchmarkMode(Array(Mode.AverageTime))
+@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@Warmup(iterations = 3, time = 10, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 10, timeUnit = TimeUnit.SECONDS)
+@Fork(1)
+class MatBench:
+  @Benchmark
+  def manual(m: Data, blackHole: Blackhole) =
+    val x1 = MatManual(m.mat1values, m.n)
+    val y1 = MatManual(m.mat2values, m.n)
+    blackHole.consume(x1.matMul(y1, m.result))
+
+  @Benchmark
+  def generic(m: Data, blackHole: Blackhole) =
+    val x1 = MatGeneric[Int](m.mat1values, m.n)
+    val y1 = MatGeneric[Int](m.mat2values, m.n)
+    blackHole.consume(x1.matMul(y1, m.result))
+
+  @Benchmark
+  def specialized(m: Data, blackHole: Blackhole) =
+    val x1 = new MatSpecialized[Int](m.mat1values, m.n) {}
+    val y1 = new MatSpecialized[Int](m.mat2values, m.n) {}
+    blackHole.consume(x1.matMul(y1, m.result))
