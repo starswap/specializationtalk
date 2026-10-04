@@ -1,3 +1,3 @@
 ### Scala Specialization Demonstration
 
-Run with: scala-cli --power --jmh  .
+Run with: `scala-cli --power --jmh  .`
