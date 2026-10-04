@@ -1,3 +1,5 @@
+package specializationtalk.matrix
+
 // Flat row-major layout: element (i,j) of an n x n matrix is at index i*n+j
 class IntMatrix(val elems: Array[Int], val n: Int):
   def apply(i: Int, j: Int): Int = elems(i * n + j)
