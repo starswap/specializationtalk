@@ -25,7 +25,6 @@ class Data:
 @Measurement(iterations = 3, time = 10, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
 class MatBench:
-  ???
   // @Benchmark
   // def manual(m: Data, blackHole: Blackhole) =
   //   val x1 = IntMatrix(m.mat1values, m.n)
@@ -38,8 +37,8 @@ class MatBench:
   //   val y1 = GenericMatrix[Int](m.mat2values, m.n)
   //   blackHole.consume(x1.matMul(y1, m.result))
 
-  // @Benchmark
-  // def specialized(m: Data, blackHole: Blackhole) =
-  //   val x1 = new SpecializedMatrix[Int](m.mat1values, m.n) {}
-  //   val y1 = new SpecializedMatrix[Int](m.mat2values, m.n) {}
-  //   blackHole.consume(x1.matMul(y1, m.result))
+  @Benchmark
+  def specialized(m: Data, blackHole: Blackhole) =
+    val x1 = new SpecializedMatrix[Int](m.mat1values, m.n) {}
+    val y1 = new SpecializedMatrix[Int](m.mat2values, m.n) {}
+    blackHole.consume(x1.matMul(y1, m.result))
