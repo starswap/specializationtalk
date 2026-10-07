@@ -2,6 +2,8 @@
 <html lang="en-GB"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Specialization? In Scala 3?</title>
+<link rel="icon" type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg version='1.0' viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 110.437V94.874h5.616c3.113 0 8.052-.203 11.03-.474l5.278-.406-7.038-1.894c-3.924-1.015-8.864-2.504-10.961-3.316L25 87.364V55.627h6.293c3.383 0 8.323-.203 10.894-.473l4.737-.406-8.323-2.233C34 51.366 29.128 49.809 27.639 49.2L25 47.982v-30.72l2.098-.473c1.15-.203 3.992-.406 6.293-.406 11.367 0 38.366-3.722 51.628-7.105 9.27-2.436 15.698-4.872 17.931-6.902 1.15-1.015 1.218-.406 1.218 14.548v15.63l-1.624 1.219-1.624 1.285 3.248 2.842v33.9l-1.624 1.218-1.624 1.286 3.248 2.842v33.9l-1.76 1.353c-1.894 1.489-9.202 3.993-17.524 6.09C71.892 121.737 40.157 126 29.33 126H25z' fill='%23390d09'/%3E%3Cg fill='%23de3423'%3E%3Cpath d='M25 110.572V95.077l11.842-.474c12.315-.473 21.45-1.488 34.847-3.789 15.225-2.639 30.246-7.375 31.803-10.082.406-.677.676 4.534.676 14.616v15.698l-1.76 1.353c-1.894 1.489-9.202 3.993-17.524 6.09C71.892 121.737 40.157 126 29.33 126H25zM25 71.327V55.83l11.842-.406c13.127-.541 23.344-1.691 36.877-4.195 15.157-2.842 28.96-7.443 29.976-9.947.203-.473.406 6.09.406 14.616.067 13.533-.068 15.698-1.083 16.78-2.368 2.64-20.638 7.376-39.449 10.286-11.435 1.76-30.381 3.79-35.66 3.79H25zM25 32.352V17.195l2.098-.406c1.15-.203 3.992-.406 6.293-.406 11.367 0 38.366-3.722 51.628-7.105 9.27-2.436 15.698-4.872 17.931-6.902 1.15-1.015 1.218-.406 1.218 14.48 0 14.548-.067 15.63-1.285 16.714-1.827 1.691-14.345 5.548-24.09 7.51-15.765 3.113-41.951 6.429-50.883 6.429H25z'/%3E%3C/g%3E%3C/svg%3E" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#FAF8F4;--ink:#24242B;--mu:#6B6B73;--code:#F0EBE1;--red:#DC322F;--kw:#7A4DA8;--hl:#FBE3A6;--gen:#D08A2E;--man:#9AA3AD;--spec:#2E7D5B;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -102,7 +104,7 @@ const FOO=`inline trait Foo[T: Specialized](x: T):
 
 def f(b: Foo[Int]) = 37 + b.g
 
-@main def main(args: Array[String]): Unit =
+def main(args: Array[String]): Unit =
   val x = new Foo[Int](42) {}
   val y = f(x)`;
 const SPEC=`package specializationtalk.matrix
@@ -142,7 +144,7 @@ D("Example: IntMatrix",["Imagine a linear algebra library with a Matrix type tha
 D("Example: GenericMatrix",["! Copy IntMatrix and modify it into this verbatim:",V(GEN),"Explain the Numeric typeclass instance and summoning it with summon."]),
 ["GenericMatrix",C(GEN),0,[
 "! Run the same 300×300 Int benchmark (MatBench.generic ≈ 268.7 ms/op).","Ten times slower, and the operation didn't change. Did we make a mistake? Run it again…","That's the point: going generic, even when we use Int at the call site, costs a huge penalty. Why? Erasure.","Show of hands: do we know what erasure is? Do we like it? Quick recap, because JVM compatibility is a core Scala selling point."],0,1],
-["Erasure: CPU",`${H('Erasure')}<div class="row"><div><div class="lab">Int</div>${C('def add(a: Int, b: Int) = a + b','md')}<div class="chip">add eax, ebx</div></div><div><div class="lab">Float</div>${C('def add(a: Float, b: Float) = a + b','md')}<div class="chip">addss xmm0, xmm1</div></div></div>`,0,[
+["Erasure: CPU",`${H('Erasure')}<div class="row">${C('def add[T](a: T, b: T) = a + b','md')}</div><div class="row"><div><div class="lab">Int</div><div class="chip">add eax, ebx</div></div><div><div class="lab">Float</div><div class="chip">addss xmm0, xmm1</div></div></div>`,0,[
 "We want to write code against generic type parameters, but the CPU represents different types differently, so one machine-code function usually can't serve several types.","Source code on top, the instruction the CPU actually runs below: adding two ints is a different instruction from adding two floats."]],
 ["Monomorphisation vs erasure",`<div class="row"><div><div class="lab">Monomorphisation</div><div class="chip">myFunction[Int]</div><div class="chip">myFunction[Float]</div><div class="chip">myFunction[Double]</div></div><div><div class="lab">Erasure</div><div class="chip">myFunction[Object]</div>${C(`int x = 42;                       // primitive
 Integer y = Integer.valueOf(42);  // boxed
@@ -185,17 +187,7 @@ D("Example: inline traits",["! Run scala-cli examples/inline_traits.scala. Type 
 class B extends A[Int](1):
   override val x: Int = 1
   override def foo: Int = this.x`,'lg',1)}`,1,[
-"! Show the inlining, then remove `inline` and show what changes.","x and foo have type Int in B: genuinely primitive Ints, not boxed Integers.","Check: does this make sense to everyone?","No matter how big A gets, B's source stays empty: we keep generics, no copy-paste."],0,1],
-["Boilerplate",C(`inline trait Matrix[T](val elems: Array[T], val n: Int):
-  ...
-
-class IntMatrix(e: Array[Int], n: Int)
-  extends Matrix[Int](e, n)
-class FloatMatrix(e: Array[Float], n: Int)
-  extends Matrix[Float](e, n)
-class DoubleMatrix(e: Array[Double], n: Int)
-  extends Matrix[Double](e, n)`,'lg'),0,[
-"Problem 1: we must use B everywhere instead of A[Int], so specialization isn't automatic.","Boilerplate for every type (Matrix example), and worse with several type parameters (a product of combinations)."]],
+"! Show the inlining, then remove `inline` and show what changes.","x and foo have type Int in B: genuinely primitive Ints, not boxed Integers.","Check: does this make sense to everyone?","So if we use B everywhere instead of A[Int] we get specialization via this mechanism. No matter how big A gets, B's source stays empty: we keep generics, no copy-paste."],0,1],
 ["Interfaces lose specialization",C(`inline trait Foo[T](x: T):
   def g#1: T = x
 
@@ -208,7 +200,17 @@ def f(b: Foo[Int]) = 37 + «b.g#1»
 @main def main =
   val x = Bar()
   f(x)`,'lg'),0,[
-"Problem 2: we lose specialization at interfaces. b is typed Foo[Int], so b.g calls the unspecialized g#1."]],
+"Problem 1: we lose specialization at interfaces. b is typed Foo[Int], so b.g calls the unspecialized g#1."]],
+["Boilerplate",C(`inline trait Matrix[T](val elems: Array[T], val n: Int):
+  ...
+
+class IntMatrix(e: Array[Int], n: Int)
+  extends Matrix[Int](e, n)
+class FloatMatrix(e: Array[Float], n: Int)
+  extends Matrix[Float](e, n)
+class DoubleMatrix(e: Array[Double], n: Int)
+  extends Matrix[Double](e, n)`,'lg'),0,[
+"Problem 2: we must use B everywhere instead of A[Int], so specialization isn't automatic.","Boilerplate for every type (Matrix example), and worse with several type parameters (a product of combinations). "]],
 ["Generic methods",C(`inline trait Vec[T]
 class VecInt extends Vec[Int]
 
@@ -216,14 +218,14 @@ def times[T](x: Vec[T], y: Vec[T])
 
 // even making this method inline does not allow for specialization:
 inline def times[T](x: Vec[T], y: Vec[T])`,'lg'),0,[
-"Particularly bad for generic methods: we can't get specialization at all, even if the method is inline."]],
+"Particularly bad for generic methods: we can't get specialization at all, even if the method is inline. More boilerplate we don't want to write by hand. Can the compiler generate it?"]],
 ["Specialized traits",`<div class="two"><div class="lab">You write</div><div class="lab">Compiler generates</div>${C(`inline trait Foo[T: «Specialized»](x: T):
   def g: T = x`,'m2')}${C(`inline trait Foo$sp$Int extends Foo[Int]:
   override def g: Int`,'m2',1)}${C(`def f(b: Foo[Int]) = 37 + b.g`,'m2')}${C(`def f(b: «Foo$sp$Int») = 37 + b.g`,'m2',2)}${C(`val x = new Foo[Int](42) {}`,'m2')}${C(`val x = new «Foo$impl$Int»(42)`,'m2',3)}<div></div>${C(`class Foo$impl$Int(x: Int)
   extends Foo$sp$Int, Foo[Int](this.x):
   private val Foo$$x: Int = this.x
   override def g: Int = this.Foo$$x`,'m2',3)}</div>`,3,[
-"More boilerplate we don't want to write by hand. Can the compiler generate it? Left column is all the user writes; the Specialized context bound marks the trait.","Step 1: for every Foo[Int] in the program the compiler generates a Foo$sp$Int interface trait, specialized via inline traits.","Step 2: it replaces Foo[Int] with Foo$sp$Int, so member access is specialized.","Step 3: it generates $impl$ classes to replace anonymous instances (and handles value parameters like x)."]],
+"Left column is all the user writes; the Specialized context bound marks the trait.","Step 1: for every Foo[Int] in the program the compiler generates a Foo$sp$Int interface trait, specialized via inline traits.","Step 2: it replaces Foo[Int] with Foo$sp$Int, so member access is specialized.","Step 3: it generates $impl$ classes to replace anonymous instances (and handles value parameters like x)."]],
 D("Example: Foo",["! Live-code this verbatim, then show the generated result:",V(FOO)]),
 ["Foo example",C(FOO,'lg'),0,[
 "Same code as before, now with the Specialized bound. The call to b.g in f is specialized."],0,1],
