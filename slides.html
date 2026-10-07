@@ -158,7 +158,7 @@ const S=[
 "Thanks for coming! Talk is about specialization in Scala 3. I want to start with an example.","Timer starts when you leave this slide (click timer to pause, R to reset)."]],
 D("Example: IntMatrix",["Imagine a linear algebra library with a Matrix type that can multiply two matrices.","! Live-code this verbatim:",V(INT)]),
 ["IntMatrix",C(INT),0,[
-"! Show benchmark and then run the benchmark in the editor (<code>scala-cli --power --jmh  .</code>) (MatBench.manual ≈ 21.8 ms/op). Ask for questions while it runs.","300×300 in about 20 ms: ~10⁹ ops/s, about right for a modern CPU with vector instructions. C++ does the same in 4 ms.","But a library of Int-only matrices isn't very useful: we want floats and other numeric types too."],0,1],
+"! Show benchmark and then run the benchmark in the editor (<code>scala --power --jmh  .</code>) (MatBench.manual ≈ 21.8 ms/op). Ask for questions while it runs.","300×300 in about 20 ms: ~10⁹ ops/s, about right for a modern CPU with vector instructions. C++ does the same in 4 ms.","But a library of Int-only matrices isn't very useful: we want floats and other numeric types too."],0,1],
 D("Example: GenericMatrix",["! Copy IntMatrix and modify it into this verbatim:",V(GEN),"Explain the Numeric typeclass instance and summoning it with summon."]),
 ["GenericMatrix",C(GEN),0,[
 "! Run the same 300×300 Int benchmark (MatBench.generic ≈ 268.7 ms/op).","Ten times slower, and the operation didn't change. Did we make a mistake? Run it again…","That's the point: going generic, even when we use Int at the call site, costs a huge penalty. Why? Erasure.","Show of hands: do we know what erasure is? Do we like it? Quick recap, because JVM compatibility is a core Scala selling point."],0,1],
@@ -200,7 +200,7 @@ public final class Integer extends Number {
         result.«[]update»(i$1, result.[]apply(i$1) «+» aik «*» other.apply(k, j))))
     new IntMatrix(result, n)`,'sm')}`,0,[
 "Manually specialized: actual primitive ints, actual int arrays, primitive + and * instead of method calls.","But we want the expressiveness of generics. Can we get IntMatrix performance with generic types?","Idea: the user writes generic code and the compiler specializes behind the scenes."]],
-D("Example: inline traits",["! Run scala-cli examples/inline_traits.scala. Type this verbatim:",V(INL),"A simple starting point: a new kind of trait that specializes when you subclass it."]),
+D("Example: inline traits",["! Run scala examples/inline_traits.scala. Type this verbatim:",V(INL),"A simple starting point: a new kind of trait that specializes when you subclass it."]),
 ["Inline traits",`${C(INL,'lg')}${C(`// inlines to:
 class B extends A[Int](1):
   override val x: Int = 1
